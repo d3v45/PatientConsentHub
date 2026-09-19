@@ -13,11 +13,16 @@ namespace PatientConsentHub.Services.Devices;
 /// </summary>
 public sealed class DeviceManager
 {
+    // Matches a device line regardless of which tag ffmpeg puts in the
+    // brackets - different builds print "[dshow @ 0x...]", "[in#0 @ 0x...]",
+    // or similar. What is reliable across builds is the quoted name followed
+    // by "(video)", "(audio)" or "(none)" at the end of the line.
     private static readonly Regex DeviceLine =
-        new(@"\[dshow[^\]]*\]\s+""(?<name>[^""]+)""(?:\s+\((?<kind>video|audio)\))?", RegexOptions.Compiled);
+        new(@"^\[[^\]]*\]\s*""(?<name>[^""]+)""\s*\((?<kind>video|audio|none)\)\s*$",
+            RegexOptions.Compiled);
 
     private static readonly Regex AltNameLine =
-        new(@"\[dshow[^\]]*\]\s+Alternative name\s+""(?<alt>[^""]+)""", RegexOptions.Compiled);
+        new(@"^\[[^\]]*\]\s*Alternative name\s*""(?<alt>[^""]+)""\s*$", RegexOptions.Compiled);
 
     public IReadOnlyList<CaptureDevice> Cameras { get; private set; } = Array.Empty<CaptureDevice>();
     public IReadOnlyList<CaptureDevice> Microphones { get; private set; } = Array.Empty<CaptureDevice>();
@@ -35,46 +40,35 @@ public sealed class DeviceManager
                 "-list_devices", "true", "-f", "dshow", "-i", "dummy"
             });
 
-            string? section = null;                 // "video" | "audio"
             string? pendingName = null;
             string? pendingKind = null;
 
             void Flush(string? alt)
             {
                 if (pendingName is null) return;
-                var kind = pendingKind ?? section;
-                var list = kind == "audio" ? mics : kind == "video" ? cameras : null;
-                if (list is not null)
+
+                // "(none)" shows up for a handful of virtual cameras whose
+                // driver does not report a type to dshow explicitly; every
+                // microphone/line-in ffmpeg has ever been seen to report
+                // says "(audio)" outright, so treating "(none)" as video is
+                // the safe default rather than risking a camera being lost.
+                var isAudio = pendingKind == "audio";
+                var list = isAudio ? mics : cameras;
+
+                list.Add(new CaptureDevice
                 {
-                    list.Add(new CaptureDevice
-                    {
-                        Name = pendingName,
-                        AlternativeName = alt,
-                        Index = list.Count
-                    });
-                }
+                    Name = pendingName,
+                    AlternativeName = alt,
+                    Index = list.Count
+                });
+
                 pendingName = null;
                 pendingKind = null;
             }
 
             foreach (var raw in output.Split('\n'))
             {
-                var line = raw.TrimEnd('\r');
-
-                // Older FFmpeg builds group devices under headings instead of
-                // tagging each line, so track both styles.
-                if (line.Contains("DirectShow video devices", StringComparison.OrdinalIgnoreCase))
-                {
-                    Flush(null);
-                    section = "video";
-                    continue;
-                }
-                if (line.Contains("DirectShow audio devices", StringComparison.OrdinalIgnoreCase))
-                {
-                    Flush(null);
-                    section = "audio";
-                    continue;
-                }
+                var line = raw.TrimEnd('\r').Trim();
 
                 var alt = AltNameLine.Match(line);
                 if (alt.Success)
@@ -86,9 +80,9 @@ public sealed class DeviceManager
                 var dev = DeviceLine.Match(line);
                 if (dev.Success)
                 {
-                    Flush(null);   // previous device had no alternative-name line
+                    Flush(null);   // the previous device had no alternative-name line
                     pendingName = dev.Groups["name"].Value;
-                    pendingKind = dev.Groups["kind"].Success ? dev.Groups["kind"].Value : null;
+                    pendingKind = dev.Groups["kind"].Value;
                 }
             }
 
