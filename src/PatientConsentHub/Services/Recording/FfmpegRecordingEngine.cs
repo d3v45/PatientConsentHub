@@ -178,6 +178,7 @@ public sealed class FfmpegRecordingEngine : IRecordingEngine
         args.AddRange(new[] { "-g", (r.CameraFps * 2).ToString() });
         args.AddRange(new[] { "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "1" });
         args.AddRange(new[] { "-movflags", "+frag_keyframe+empty_moov+default_base_is_moof" });
+        args.AddRange(new[] { "-f", "mp4" });   // extension is ".partial", so the format must be explicit
         args.Add(_cameraPartial);
 
         // ---- Output 2: the screen video, sharing the same audio track
@@ -190,6 +191,7 @@ public sealed class FfmpegRecordingEngine : IRecordingEngine
             args.AddRange(new[] { "-g", (r.ScreenFps * 2).ToString() });
             args.AddRange(new[] { "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "1" });
             args.AddRange(new[] { "-movflags", "+frag_keyframe+empty_moov+default_base_is_moof" });
+            args.AddRange(new[] { "-f", "mp4" });
             args.Add(_screenPartial!);
         }
 
@@ -400,13 +402,16 @@ public sealed class FfmpegRecordingEngine : IRecordingEngine
             return "Windows blocked access to the camera or microphone. " +
                    "Please check the privacy settings in Windows and try again.";
 
+        if (s.Contains("unable to choose an output format") || s.Contains("error initializing the muxer"))
+            return "The recording file could not be created. Please check the storage location and try again.";
+
         if (s.Contains("no space left"))
             return "The storage location ran out of space. Please free up space and try again.";
 
         if (s.Contains("unable to find a suitable output format") || s.Contains("no such file or directory"))
             return "The recording location could not be used. Please check the folder in Settings.";
 
-        if (s.Contains("gdigrab") || s.Contains("desktop"))
+        if ((s.Contains("gdigrab") || s.Contains("desktop")) && s.Contains("error"))
             return "The screen could not be recorded. Please check the display connection and try again.";
 
         return "The recording stopped unexpectedly. Please check the camera, microphone and storage, then try again.";
