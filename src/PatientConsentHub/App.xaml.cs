@@ -6,9 +6,11 @@ using PatientConsentHub.Services.Logging;
 using PatientConsentHub.Services.Settings;
 using PatientConsentHub.Views;
 
+using WpfApplication = System.Windows.Application;
+
 namespace PatientConsentHub;
 
-public partial class App : Application
+public partial class App : WpfApplication
 {
     public static SettingsManager Settings { get; private set; } = null!;
     public static IAuthenticationService Auth { get; private set; } = null!;
