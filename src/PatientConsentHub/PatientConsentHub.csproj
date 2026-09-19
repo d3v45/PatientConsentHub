@@ -21,6 +21,23 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
+  <!--
+    UseWPF and UseWindowsForms together make the SDK add a project-wide
+    "global using System.Windows.Forms;" alongside WPF's own global usings.
+    Every type that exists in both namespaces (Application, KeyEventArgs,
+    MessageBox, Cursors, MouseEventArgs, ...) then becomes ambiguous
+    everywhere in the project, not just where WinForms is actually used.
+
+    The only WinForms features this app needs - Screen.AllScreens (in
+    Services/Devices/ScreenManager.cs) and FolderBrowserDialog (in
+    Views/SettingsWindow.xaml.cs) - are already accessed through an explicit
+    "using WinForms = System.Windows.Forms;" alias, so removing the implicit
+    global using does not affect them, and no other file needs changing.
+  -->
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="OpenCvSharp4" Version="4.10.0.20241107" />
