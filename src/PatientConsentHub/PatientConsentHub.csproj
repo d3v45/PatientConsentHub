@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <AssemblyName>PatientConsentHub</AssemblyName>
+    <RootNamespace>PatientConsentHub</RootNamespace>
+    <Version>1.0.0</Version>
+    <Company>A&amp;T</Company>
+    <Product>Patient Consent Hub</Product>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="OpenCvSharp4" Version="4.10.0.20241107" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.10.0.20241107" />
+    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.10.0.20241107" />
+  </ItemGroup>
+
+  <!-- FFmpeg is copied next to the executable so the app is fully self-contained.
+       Place ffmpeg.exe in src\PatientConsentHub\Tools\ffmpeg\ before building.
+       See build.ps1 and README.md. -->
+  <ItemGroup>
+    <None Update="Tools\ffmpeg\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

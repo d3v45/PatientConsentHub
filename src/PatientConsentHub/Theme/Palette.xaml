@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Clinical, high-contrast palette: white surfaces, teal/blue accent -->
+    <Color x:Key="AccentColor">#0E7C86</Color>
+    <Color x:Key="AccentDarkColor">#0A5D65</Color>
+    <Color x:Key="DeepBlueColor">#123B5C</Color>
+
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="AccentDarkBrush" Color="{StaticResource AccentDarkColor}" />
+    <SolidColorBrush x:Key="DeepBlueBrush" Color="{StaticResource DeepBlueColor}" />
+
+    <SolidColorBrush x:Key="PageBackgroundBrush" Color="#F4F7F9" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="BorderBrush" Color="#D4DDE4" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#16222B" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#5A6B77" />
+
+    <SolidColorBrush x:Key="RecordBrush" Color="#C62828" />
+    <SolidColorBrush x:Key="RecordDarkBrush" Color="#9E1F1F" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="#1B7F4B" />
+    <SolidColorBrush x:Key="WarningBrush" Color="#B26A00" />
+    <SolidColorBrush x:Key="DisabledBrush" Color="#AFBCC5" />
+
+</ResourceDictionary>

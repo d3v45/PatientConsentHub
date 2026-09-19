@@ -1,0 +1,36 @@
+Place ffmpeg.exe in this folder before building.
+
+Why this folder
+---------------
+Patient Consent Hub uses FFmpeg for capture and finalisation. It is shipped
+inside the application so that hospital staff never install anything
+themselves - copying ffmpeg.exe here makes it part of the build output and,
+in turn, part of the installer.
+
+Which build to use
+------------------
+A Windows x64 build with libx264, dshow and gdigrab enabled. The
+"essentials" builds from either of these projects are suitable:
+
+  * https://www.gyan.dev/ffmpeg/builds/          (ffmpeg-release-essentials.zip)
+  * https://github.com/BtbN/FFmpeg-Builds/releases   (ffmpeg-master-latest-win64-gpl.zip)
+
+Copy only ffmpeg.exe from the archive's bin folder into this directory.
+ffprobe.exe and ffplay.exe are not required.
+
+Licensing note
+--------------
+libx264 makes those builds GPL-licensed. Because FFmpeg runs as a separate
+process rather than being linked into the application, this is the usual
+distribution arrangement, but confirm the licence terms with A&T before
+shipping commercially. An LGPL build without libx264 also works if the
+encoder settings in FfmpegRecordingEngine.cs are changed to mpeg4 or to a
+hardware encoder such as h264_qsv or h264_nvenc.
+
+Verifying
+---------
+From this folder, run:
+
+    .\ffmpeg.exe -hide_banner -list_devices true -f dshow -i dummy
+
+The cameras and microphones connected to the machine should be listed.

@@ -1,0 +1,18 @@
+# Build output
+bin/
+obj/
+publish/
+installer/Output/
+
+# The bundled capture binary is not committed - see
+# src/PatientConsentHub/Tools/ffmpeg/PLACE_FFMPEG_HERE.txt
+src/PatientConsentHub/Tools/ffmpeg/ffmpeg.exe
+
+# IDE
+.vs/
+*.user
+*.suo
+
+# Local test artefacts
+*.log
+*.partial

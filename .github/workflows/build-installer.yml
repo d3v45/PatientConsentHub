@@ -1,0 +1,67 @@
+# ============================================================================
+#  Builds PatientConsentHub_Setup.exe on a Windows machine in the cloud.
+#
+#  How to use it:
+#    1. Push this repository to GitHub.
+#    2. Open the "Actions" tab, choose "Build Installer", press "Run workflow".
+#    3. Wait ~10 minutes, then download the installer from the run's
+#       "Artifacts" section at the bottom of the page.
+#
+#  Nothing needs to be installed on your own computer.
+# ============================================================================
+
+name: Build Installer
+
+on:
+  workflow_dispatch:        # lets you start it by hand from the Actions tab
+  push:
+    tags:
+      - 'v*'                # tagging a release also produces an installer
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Get the source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Download FFmpeg
+        shell: pwsh
+        run: |
+          $url = 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip'
+          Write-Host "Downloading FFmpeg..."
+          Invoke-WebRequest -Uri $url -OutFile ffmpeg.zip -UseBasicParsing
+          Expand-Archive ffmpeg.zip -DestinationPath ffmpeg-extract
+          $exe = Get-ChildItem ffmpeg-extract -Recurse -Filter ffmpeg.exe | Select-Object -First 1
+          if (-not $exe) { throw "ffmpeg.exe was not found in the download." }
+          New-Item -ItemType Directory -Force -Path src\PatientConsentHub\Tools\ffmpeg | Out-Null
+          Copy-Item $exe.FullName src\PatientConsentHub\Tools\ffmpeg\ffmpeg.exe
+          Write-Host "FFmpeg ready."
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Build application and installer
+        shell: pwsh
+        run: .\build.ps1 -Installer
+
+      - name: Upload the installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: PatientConsentHub-Setup
+          path: installer/Output/PatientConsentHub_Setup.exe
+          retention-days: 30
+
+      - name: Upload the plain application folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: PatientConsentHub-App
+          path: publish/
+          retention-days: 30
