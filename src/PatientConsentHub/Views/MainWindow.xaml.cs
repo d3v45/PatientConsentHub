@@ -11,6 +11,8 @@ using PatientConsentHub.Services.Recording;
 using PatientConsentHub.Services.Recovery;
 using PatientConsentHub.Services.Storage;
 
+using WpfKeyEventArgs = System.Windows.Input.KeyEventArgs;
+
 namespace PatientConsentHub.Views;
 
 public partial class MainWindow : Window
@@ -488,7 +490,7 @@ public partial class MainWindow : Window
     //  Navigation, shortcuts, shutdown
     // =====================================================================
 
-    private void OnWindowKeyDown(object sender, KeyEventArgs e)
+    private void OnWindowKeyDown(object sender, WpfKeyEventArgs e)
     {
         if (e.Key == Key.F9 && !_engine.IsRecording && SetupView.IsVisible)
         {
